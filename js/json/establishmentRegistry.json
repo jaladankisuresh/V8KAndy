@@ -1,0 +1,18 @@
+{
+"name" : "Registry India",
+"description" : "Registry of all the establishments",
+"establishments" : [
+  {"name": "Name A", "type":  "Hotel", "location": "A", "rating":  2, "stars": 3, "roomsCount":  20, "isAttachedRestaurant" : false,  
+  "comments":  [{"id": 12, "text" : "One"}, {"id": 13, "text" : "Two"}, {"id": 14, "text" : "Three"}]},
+  {"name": "Name A", "type":  "Restaurant", "location": "B", "rating":  1, "cuisineType": "indian", "chefsCount":  5, "seatingCapacity" : 22,  "comments":  []},
+  {"name": "Name A", "type":  "Restaurant", "location": "B", "rating":  1, "cuisineType": "indian", "chefsCount":  5, "seatingCapacity" : 22,  "comments":  []},
+  {"name": "Name A", "type":  "Hotel", "location": "A", "rating":  2, "stars": 3, "roomsCount":  20, "isAttachedRestaurant" : false,  "comments":  []},
+  {"name": "Name A", "type":  "Restaurant", "location": "C", "rating":  3, "cuisineType": "indian", "chefsCount":  3, "seatingCapacity" : 12,  "comments":  []},
+  {"name": "Name A", "type":  "Theatre", "location": "C", "rating":  3, "screensCount":  3, "seatingCapacity" : 12, "showsPerScreen" : 3, 
+   "comments":  [{"id": 14, "text" : "Four"}, {"id": 15, "text" : "Five"}, {"id": 16, "text" : "Six"}]},
+  {"name": "Name A", "type":  "Theatre", "location": "C", "rating":  3, "screensCount":  3, "seatingCapacity" : 12, "showsPerScreen" : 3, "comments":  []},
+  {"name": "Name A", "type":  "Hotel", "location": "B", "rating":  1, "stars": 2, "roomsCount":  25, "isAttachedRestaurant" : false, 
+  "comments":  [{"id": 12, "text" : "One"}, {"id": 13, "text" : "Two"}, {"id": 14, "text" : "Three"}]},
+  {"name": "Name A", "type":  "Theatre", "location": "C", "rating":  3, "screensCount":  3, "seatingCapacity" : 12, "showsPerScreen" : 3, "comments":  []}
+]
+}
