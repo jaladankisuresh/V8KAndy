@@ -2,15 +2,17 @@
 
 buildscript {
     ext{
-        kotlin_version = '1.2.10';
-//        kotlinx_coroutines_version = '0.20';
+        kotlin_version = '1.2.20';
+        kotlinx_coroutines_version = '0.20';
         v7_version = '27.0.2';
+        arch_version = '1.0.0';
         j2v8_version = '4.8.0';
         okhttp3_version = '3.9.1';
         glide_version = '4.4.0';
         glide_okhttp3_version = '1.5.0';
         anko_version = '0.10.3';
         moshi_version = '1.5.0';
+        koin_version = '0.8.0';
     }
     repositories {
         google()

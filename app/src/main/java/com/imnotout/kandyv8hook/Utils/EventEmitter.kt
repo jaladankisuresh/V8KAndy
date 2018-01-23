@@ -1,41 +1,54 @@
 package com.imnotout.kandyv8hook.Utils
 
-import com.imnotout.kandyv8hook.Models.IParsable
+import android.util.Log
+import com.imnotout.kandyv8hook.LOG_APP_TAG
+import com.imnotout.kandyv8hook.Views.IActionListener
 
 // Kotlin port of Node.js Core EventEmitter
 // https://github.com/nodejs/node/blob/3bb6f07d528905d2ba6b9a4710890bc74350d7f0/lib/events.js
-object EventEmitter {
-    private var events : Map<String, out ArrayList<(IParsable)-> Unit>> = mutableMapOf()
-    fun<T: IParsable> on(key: String, cb: (T)-> Unit) {
-        events.get(key)?.run {
-            add { cb }
+// It also takes cues from Node.kt MIT Project
+// https://github.com/jonninja/node.kt/blob/master/src/main/kotlin/node/EventEmitter.kt
+
+open class EventEmitter {
+    private val events = HashMap<String, MutableList<Pair<Any?, (Any?)-> Unit>>>()
+    fun<T> on(key: String, callPair: Pair<Any?, (T?)-> Unit>) {
+        val cbUnsafe = callPair.second as (Any?)-> Unit
+        if(events[key] == null) {
+            events[key] = mutableListOf<Pair<Any?, (Any?)-> Unit>>()
+        }
+        events[key]!!.add(Pair(callPair.first, cbUnsafe))
+    }
+    fun<T> on(key: String, cb: (T?)-> Unit) = on(key, callPair = Pair(null, cb))
+    fun<T> off(key: String, caller: Any) {
+        events[key]?.run {
+            map { if(it.first?.equals(caller) ?: false) remove(it) }
+            if( size == 0) events.remove(key)
         }
     }
-    fun<T: IParsable> off(key: String, cb: (T)-> Unit) {
-        events.get(key)?.run {
-            val cbPosition = indexOf { cb }
-            if(cbPosition == -1) return
-            remove { cbPosition }
-        }
-    }
-    fun<T: IParsable> emit(key: String, obj: T) {
-        events.get(key)?.map {
-            when(it) {
-                is (ParsableWrap<T>) -> Unit -> {
-                    // listener is registered as once callback, call the listener only once and remove the listener silently
-                    it(ParsableWrap(obj))
-                    this.off(key, it)
-                }
-                else -> it( obj )
+    fun<T> off(key: String, cb: (T?)-> Unit) {
+        events[key]?.run {
+            val cbUnsafe = cb as (Any?)-> Unit
+            map {
+                if(it.second.equals(cbUnsafe)) remove(it)
             }
+            if( size == 0) events.remove(key)
         }
     }
-    fun<T: IParsable> once(key: String, cb: (T)-> Unit) = on(key, { k : ParsableWrap<T> -> cb(k.obj) })
-    fun<T: IParsable> addListener(key: String, cb: (T)-> Unit) = on(key, cb)
-
-    fun<T: IParsable> removeListener(key: String, cb: (T)-> Unit) = off(key, cb)
+    fun<T> emit(key: String, obj: T) {
+        events[key]?.forEach {
+            it.second(obj)
+        }
+    }
+    fun<T> once(key: String, cb: (T?)-> Unit) {
+        val cbUnsafe = cb as (Any?)-> Unit
+        fun<T> callOnce(obj: T?) {
+            off<T>(key, ::callOnce)
+            cbUnsafe(obj)
+        }
+        on<T>(key, ::callOnce)
+    }
+    fun<T> addListener(key: String, cb: (T?)-> Unit) = on(key, cb)
+    fun<T> addListener(key: String, callPair: Pair<Any?, (T?)-> Unit>) = on(key, callPair = callPair)
+    fun<T> removeListener(key: String, caller: Any) = off<T>(key, caller = caller)
+    fun<T> removeListener(key: String, cb: (T?)-> Unit) = off(key, cb)
 }
-class ParsableWrap<T: IParsable>(val obj: T) : IParsable by obj {
-    val onceOnly = true
-}
-

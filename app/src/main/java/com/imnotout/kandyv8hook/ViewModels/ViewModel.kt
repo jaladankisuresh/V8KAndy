@@ -7,6 +7,7 @@ import com.eclipsesource.v8.V8Object
 import com.imnotout.kandyv8hook.AndroidApplication
 import com.imnotout.kandyv8hook.JS
 import com.imnotout.kandyv8hook.LOG_APP_TAG
+import com.imnotout.kandyv8hook.Models.Either
 import com.imnotout.kandyv8hook.NetworkIO.JsonBuilder
 import java.lang.reflect.Type
 import kotlinx.coroutines.experimental.*
@@ -16,19 +17,19 @@ import kotlinx.coroutines.experimental.android.UI
 //    fun onInit (cb: (T)-> Unit)
 //    fun onDestroy()
 //}
-
-class ViewModel<T> {
+//class ViewModel<T> {
+class ViewModel<T> : android.arch.lifecycle.ViewModel() {
     var jsVM: V8Object? = null
-
-    inline fun<reified T> onInit(crossinline cb: (T)-> Unit) {
+    inline fun<reified T> onInit(crossinline cb: (Either<Throwable, T>)-> Unit) {
         val mClazz: Type = T::class.java
         val mClazzName = mClazz.toString().substringAfterLast('.')
         async(JS) {
             val jsRuntime : V8 = AndroidApplication.jsRuntime
             val iAmApp = jsRuntime.getObject("iAmApp")
             iAmApp.registerJavaMethod({ _, v8Array ->
-                v8Array.getString(0)?.let {
-                    Log.e(LOG_APP_TAG, v8Array.getString(0))
+                v8Array.getString(0)?.run {
+                    Log.e(LOG_APP_TAG, this)
+                    cb( Either.Left(RuntimeException(this)) )
                     return@registerJavaMethod
                 }
                 val modelJson = v8Array.getString(1)
@@ -37,8 +38,13 @@ class ViewModel<T> {
                 async(UI) {
                     val jsonAdapter = JsonBuilder.instance.adapter<T>(mClazz)
                     val model: T = jsonAdapter.fromJson(modelJson)!!
-                    cb(model)
-                }.invokeOnCompletion { it?.printStackTrace() }
+                    cb(Either.Right(model))
+                }.invokeOnCompletion{
+                    it?.run {
+                        printStackTrace()
+                        cb(Either.Left(this))
+                    }
+                }
             }, "get${mClazzName}VMCallback")
             val getCallback = iAmApp.getObject("get${mClazzName}VMCallback")
             val getParams = V8Array(jsRuntime).push("${mClazzName}VM").push(getCallback)
@@ -47,7 +53,12 @@ class ViewModel<T> {
             getParams.release()
             getCallback.release()
             iAmApp.release()
-        }.invokeOnCompletion { it?.printStackTrace() }
+        }.invokeOnCompletion {
+            it?.run {
+                printStackTrace()
+                cb(Either.Left(this))
+            }
+        }
     }
 
     fun onDestroy() {

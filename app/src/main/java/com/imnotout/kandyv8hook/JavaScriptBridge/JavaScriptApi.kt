@@ -50,7 +50,6 @@ sealed class JavaScriptApi {
 
         fun prepareIORequestJsFunc(runtime: V8) {
             val ioRequestJavaCallback = JavaVoidCallback { _, parameters ->
-                // JV Suresh You need to start here
                 val strParamters = Array<String>(parameters.length()) { parameters[it]!! as String }
                 async(JS) { makeHttpRequest(runtime, strParamters) }
             }

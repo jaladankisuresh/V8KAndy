@@ -10,6 +10,7 @@ module.exports = {
       let vm = iAmApp[view];
       vm.init((err, data) => {
         if(err) {
+          console.error(err);
           return cb(err);
         }
         // console.log(JSON.stringify(vm.model), vm);

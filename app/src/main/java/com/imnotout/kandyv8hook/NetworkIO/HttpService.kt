@@ -1,7 +1,7 @@
 package com.imnotout.kandyv8hook.NetworkIO
 
+import kotlinx.coroutines.experimental.*
 import okhttp3.*
-import org.jetbrains.anko.coroutines.experimental.bg
 
 const val BASE_WEB_API_URL = "http://10.0.2.2:3000/"
 //const val BASE_WEB_API_URL = "https://imnotout.com/api/"
@@ -23,7 +23,7 @@ class HttpService {
                     .build()
             return makeIORequest(request).await()
         }
-        private suspend inline fun makeIORequest(request: Request) : Call = bg {
+        private suspend inline fun makeIORequest(request: Request) : Call = async(CommonPool) {
             // Runs in background
             httpClient.newCall(request)
         }.await()

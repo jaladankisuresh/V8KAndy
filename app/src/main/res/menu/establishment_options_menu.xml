@@ -7,4 +7,9 @@
         android:orderInCategory="100"
         android:title="Add Comment"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_delete_item"
+        android:orderInCategory="101"
+        android:title="Delete Establishment"
+        app:showAsAction="never" />
 </menu>

@@ -3,16 +3,13 @@ var models = require('../models');
 var  mainVM = {
   model : undefined,
   init : function(cb) {
-    iAmApp.iAmAjax.get('establishmentRegistry.json',
-      (response) => {
-        this.model = new models.Registry(response);
-        // this.model = response;
-        cb(null, this.model);
-      },
-      (error) => {
-        cb(error);
-      }
-    );
+    iAmApp.iAmAjax.get('establishmentRegistry.json', (err, response) => {
+      if(err) return cb(err);
+
+      this.model = new models.Registry(response);
+      // this.model = response;
+      cb(null, this.model);
+    });
     // this.model = new models.Launcher();
     // cb(null, this.model);
   },

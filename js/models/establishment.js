@@ -18,7 +18,8 @@ var Establishment = class Establishment {
     this.type = data.type;
     this.location = data.location;
     this.rating = data.rating;
-    this.comments = getComments(this.path, data.comments);
+    if(data.comments && data.comments.constructor === Array)
+      this.comments = getComments(this.path, data.comments);
   }
   addComment(commentStr, cb) {
     var shortid = require('shortid');

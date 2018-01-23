@@ -40,3 +40,6 @@
   public *;
 }
 -keep class com.bumptech.glide.integration.okhttp3.OkHttpGlideModule
+
+# Proguard rules for kodein Dependency Library
+-keepattributes Signature

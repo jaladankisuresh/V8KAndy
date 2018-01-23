@@ -412,7 +412,8 @@ var Establishment = class Establishment {
     this.type = data.type;
     this.location = data.location;
     this.rating = data.rating;
-    this.comments = getComments(this.path, data.comments);
+    if(data.comments && data.comments.constructor === Array)
+      this.comments = getComments(this.path, data.comments);
   }
   addComment(commentStr, cb) {
     var shortid = __webpack_require__(6);
@@ -1193,6 +1194,7 @@ module.exports = {
       let vm = iAmApp[view];
       vm.init((err, data) => {
         if(err) {
+          console.error(err);
           return cb(err);
         }
         // console.log(JSON.stringify(vm.model), vm);
@@ -1608,16 +1610,13 @@ var models = __webpack_require__(1);
 var  mainVM = {
   model : undefined,
   init : function(cb) {
-    iAmApp.iAmAjax.get('establishmentRegistry.json',
-      (response) => {
-        this.model = new models.Registry(response);
-        // this.model = response;
-        cb(null, this.model);
-      },
-      (error) => {
-        cb(error);
-      }
-    );
+    iAmApp.iAmAjax.get('establishmentRegistry.json', (err, response) => {
+      if(err) return cb(err);
+
+      this.model = new models.Registry(response);
+      // this.model = response;
+      cb(null, this.model);
+    });
     // this.model = new models.Launcher();
     // cb(null, this.model);
   },
@@ -1650,21 +1649,19 @@ var shortid = __webpack_require__(6);
 var httpRequestQueue = {};
 var iAmAjax = {
   get : function() { //args = url, data, cb (POST) || url, cb (GET)
-    let url, data, cb = {};
+    let url, data, cb;
     let args = arguments;
     let token = shortid.generate();
     switch(args.length) {
-      case 3:
+      case 2:
         url = args[0];
-        cb.onSuccessCallback = args[1];
-        cb.onErrorCallback = args[2];
+        cb = args[1];
         this.httpGet(token, url);
         break;
-      case 4:
+      case 3:
         url = args[0];
         data = args[1];
-        cb.onSuccessCallback = args[2];
-        cb.onErrorCallback = args[3];
+        cb = args[2];
         this.httpGet(token, url, data);
         break;
       default:
@@ -1690,20 +1687,18 @@ var iAmAjax = {
   onSuccessResponse : function(token, response) {
     // typeof response is object then it is a browser HTTP request with headers. So, get response.data for getting HTTPResponse data
     // If response from Mobile HTTP client that response is JSON response data string
-    let jsObject = (typeof response === 'string') ? JSON.parse(response) : response.data;    
+    let jsObject = (typeof response === 'string') ? JSON.parse(response) : response.data;
     let cb = httpRequestQueue[token];
     delete httpRequestQueue[token];
-    if(typeof cb.onSuccessCallback === 'function') {
-      cb.onSuccessCallback(jsObject);
+    if(typeof cb === 'function') {
+      cb(null, jsObject);
     }
   },
   onErrorResponse : function(token, error) {
-    console.log(error);
-
     let cb = httpRequestQueue[token];
     delete httpRequestQueue[token];
-    if(typeof cb.onErrorResponse === 'function') {
-      cb.onErrorResponse(error);
+    if(typeof cb === 'function') {
+      cb(error);
     }
   }
 };
